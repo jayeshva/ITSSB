@@ -5,9 +5,18 @@ const mixRoute = require('./controllers/museliMix');
 const orderRoute = require('./controllers/orders');
 const jwt = require('jsonwebtoken');
 const auth = require('./auth');
+const cors = require('cors');
 const db = require('./config');
 const app = express();
 const PORT = 5000;
+
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:5000'];
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}))
+
+app.use(express.urlencoded({ extended: true }));    
 
 app.use(express.json());
 app.use('/user', userRoute);

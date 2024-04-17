@@ -43,7 +43,17 @@ router.put('/editComponent/:id', async (req, res) => {
 router.get('/getComponent', async (req, res) => {
     try {
         const result = await db.query('SELECT * FROM museli_component');
-        res.status(200).json(result);
+        //split the result based on the category
+        let component = {};
+        result.forEach((item) => {
+            if (!component[item.component_category]) {
+                component[item.component_category] = [];
+            }
+            component[item.component_category].push(item);
+        });
+        res.status(200).json(component);
+        
+        // res.status(200).json(result);
     } catch (error) {
         console.error('Error getting component:', error);
         res.status(500).json({ message: 'Error getting component' });

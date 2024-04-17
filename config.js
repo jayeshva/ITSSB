@@ -85,8 +85,7 @@ pool.getConnection((err, connection) => {
     INDEX fk_base_component_id_idx (Base_component_id), -- Index for Base_component_id column
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (user_email) REFERENCES users(email),
-    FOREIGN KEY (Base_component_id) REFERENCES museli_component(component_id),
-
+    FOREIGN KEY (Base_component_id) REFERENCES museli_component(component_id)
   )
 `, (error, results) => {
         if (error) {

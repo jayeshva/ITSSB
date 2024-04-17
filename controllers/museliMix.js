@@ -6,6 +6,7 @@ const auth = require('../auth');
 // Add museli mix details
 router.post('/addMuseliMix',auth, async (req, res) => {
     try {
+        console.log(req.body);
         const user_email = req.user;
         const user = await db.query('SELECT * FROM users WHERE email = ?', user_email);
         const user_id = user[0].id;
@@ -52,18 +53,27 @@ router.post('/editMuseliMix/:id',auth, async (req, res) => {
         res.status(500).json({ message: 'Error updating museli mix details' });
     }
 });
-
 // Delete museli mix details
-router.delete('/deleteMuseliMix/:id',auth, async (req, res) => {
+router.delete('/deleteMuseliMix/:id', auth, async (req, res) => {
     try {
-        await db.query('DELETE FROM museli_mix WHERE museli_id = ?', req.params.id);
+        // Delete related rows from museli_mix_selected_component first
         await db.query('DELETE FROM museli_mix_selected_component WHERE museli_id = ?', req.params.id);
+        
+        // Then delete the row from museli_mix
+        await db.query('DELETE FROM museli_mix WHERE museli_id = ?', req.params.id);
+
         res.status(200).json({ message: 'Museli mix details deleted successfully' });
     } catch (error) {
-        console.error('Error deleting museli mix details:', error);
-        res.status(500).json({ message: 'Error deleting museli mix details' });
+        if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+            // Handle foreign key constraint error
+            res.status(400).json({ message: 'Cannot delete the mix as it is being used in some components' });
+        } else {
+            console.error('Error deleting museli mix details:', error);
+            res.status(500).json({ message: 'Error deleting museli mix details' });
+        }
     }
 });
+
 
 // Get museli mix details by id
 router.get('/getMuseliMix/:id',auth, async (req, res) => {
